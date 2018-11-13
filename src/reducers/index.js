@@ -1,11 +1,11 @@
 
 import { combineReducers } from 'redux';
-import reducerSample from './reducer.sample';
+import reducerUsers from './reducer.users';
 import reducerActiveUser from './reducer.activeUser';
 
 
 const state= combineReducers({
-  users: reducerSample,
+  users: reducerUsers,
   user: reducerActiveUser
 });
 
