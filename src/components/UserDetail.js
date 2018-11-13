@@ -2,7 +2,9 @@
 
 import React, {Component}  from 'react'
 import { StyleSheet, View, Text, ActivityIndicator, ScrollView, Image } from 'react-native'
-import fetchUsers from '../api'
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux';
+import { getDataUser } from '../actions/users'
 
 class UserDetail extends Component {
   constructor(props) {
@@ -12,17 +14,12 @@ class UserDetail extends Component {
       isLoading: true
     }
   }
+
 // Montage details utilisateurs
   componentDidMount() {
-    fetchUsers(this.props.navigation.state.params.uuid).then(data => {
-      this.setState({
-        user: data,
-        isLoading: false
-      })
-    })
+    this.props.getDataUser(this.props.navigation.state.params.uuid)
+    this.setState({isLoading: false})
   }
-
- // systeme d' icone de loading
   _displayLoading() {
     if (this.state.isLoading) {
       return (
@@ -34,8 +31,7 @@ class UserDetail extends Component {
   }
 
   _displayUser() {
-    const { user } = this.state
-    
+    const { user } = this.props.user
     if (user != undefined) {
       return (
         <ScrollView style={styles.scrollview_container}>
@@ -110,4 +106,16 @@ const styles = StyleSheet.create({
   }
 })
 
-export default UserDetail
+const mapStateToProps = (state) => {
+
+  return {
+      user: state.user
+
+  }
+}
+
+const mapDispatchToProps = (dispatch) => ({
+  ...bindActionCreators({getDataUser}, dispatch)
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(UserDetail)

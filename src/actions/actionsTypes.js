@@ -1,2 +1,3 @@
 
 export const INIT_DATA_USERS= 'INIT_DATA_USERS';
+export const GET_DATA_USER= 'GET_DATA_USER';

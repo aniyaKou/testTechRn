@@ -24,7 +24,7 @@ class UserItem extends React.Component {
             <Text style={styles.description_text} >{user.bio}</Text>
           </View>
           <View style={styles.date_container}>
-            <Text style={styles.date_text}>{user.phone}</Text>
+            <Text style={styles.date_text}>Phone : {user.phone}</Text>
           </View>
         </View>
       </TouchableOpacity>

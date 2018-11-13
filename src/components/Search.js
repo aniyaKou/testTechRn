@@ -1,91 +1,85 @@
 import React from 'react'
 import { StyleSheet, View, TextInput, ActivityIndicator, Button, FlatList } from 'react-native'
-
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux';
+import { initDataUsers } from '../actions/users'
 import UserItem from './UserItem'
-import fetchUsers from '../api'
+
 
 class Search extends React.Component {
-constructor(props){
+  constructor(props) {
     super(props)
     this.searchedText = "";//initialisation de la recherche vide
-    this.state = { 
-        users: [],
-        searchUsers: [],
-        isLoading: false // initialisation loading false pour lancement lors recherche
+    this.state = {
+        isLoading: false // par defaut il n'y a pas de chargement
     }
 }
+
 
 // Montage de la liste utilisateurs
   componentDidMount(){
-    fetchUsers().then(data => {
-        this.setState({users: data})
-    });
+    this.props.initDataUsers()
   }
-
-  // input 
   _searchTextInputChanged(text) {
     this.searchedText = text;
 }
-// réinitialisation de la recherche
-_searchUserss() {
-    this.setState({
-        searchUsers: []
-    }, () => {
-        this._loadUsers()
-    })  
+_searchUsers() {
+  this.setState({
+      users: [] // reinitialise la recherche
+  }, () => {
+      this._loadUsers()
+  })  
 }
- // systeme d' icone de loading
-_displayLoading() {
-    if (this.state.isLoading) {
-      return (
-        <View style={styles.loading_container}>
-          <ActivityIndicator size='large' />
-        </View>
-      )
-    }
-  }
 
-//   chargement de la nouvelle liste utilisateurs
 _loadUsers(){
-    if (this.searchedText.length > 0) { 
-        this.setState({isLoading: true})// Lancement du chargement
-        fetchUsers(this.searchedText).then(data => {
-            this.setState({
-                searchUsers: [ ...this.state.users, ...data ], //  spread
-                isLoading: false //Arret du chargement recherche effectuée
-            });
-        });
-    }
+  if (this.searchedText.length > 0) { 
+      this.setState({isLoading: true})// Lancement du chargement
+      initDataUsers(this.searchedText).then(data => {
+          this.setState({
+              users: [  ...data ], // ajout des films en spread
+              isLoading: false //Arret du chargement
+          });
+      });
+  }
+}
+  _displayDetailForUser = (uuid) => {
+    this.props.navigation.navigate("UserDetail", {uuid: uuid}) // navigation dvers UserDetail
 }
 
-_displayDetailForUser = (uuid) => {
-    this.props.navigation.navigate("UserDetail", {uuid: uuid}) // navigation vers UserDetail
+_displayLoading() { // systeme de icone loading
+  if (this.state.isLoading) {
+    return (
+      <View style={styles.loading_container}>
+        <ActivityIndicator size='large' />
+      </View>
+    )
+  }
 }
     render() {
       return (
         <View style={styles.main_container}>
-          <TextInput style={styles.textinput} placeholder='Recherche utilisateur'/>
+          <TextInput style={styles.textinput} 
+          placeholder='Recherche utilisateur'
+          onChangeText={(text) => this._searchTextInputChanged(text)}
+          />
 
-          <Button style={{ height: 50 }} title='Rechercher' onPress={() => this. _loadUsers()}/>
+          <Button style={{ height: 50 }} title='Rechercher' onPress={() => this. _searchUsers()}/>
 
           <FlatList
-            data={this.state.users}
+            data={this.props.users}
             keyExtractor={(item) => item.uuid.toString()}
             renderItem={({item}) =>
-            
-            <UserItem user = {item} displayDetailForUser = {this._displayDetailForUser}/>}
-            onEndReachedThreshold={0.5}
-            onEndReached={() => {
-                if (this.state.users.length > 0){
-                  this._loadUsers()
-                } 
-            }}
-          />
-           {this._displayLoading()}
+             <UserItem 
+             user={item}
+             displayDetailForUser = {this._displayDetailForUser}/>}
+        />  
+         {this._displayLoading()}    
         </View>
       )
     }
+    
   }
+
 
   // Style composants
   const styles = StyleSheet.create({
@@ -101,5 +95,16 @@ _displayDetailForUser = (uuid) => {
       paddingLeft: 5
     }
   })
+const mapStateToProps = (state) => {
 
-  export default Search
+    return {
+        users: state.users
+
+    }
+}
+
+const mapDispatchToProps = (dispatch) => ({
+    ...bindActionCreators({initDataUsers}, dispatch)
+})
+
+  export default connect(mapStateToProps, mapDispatchToProps)(Search)

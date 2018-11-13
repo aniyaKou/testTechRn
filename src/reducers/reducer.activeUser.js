@@ -1,10 +1,10 @@
-import { INIT_DATA_USERS  } from "../actions/actionsTypes";
+import { GET_DATA_USER  } from "../actions/actionsTypes";
 
-const initialState = [] ;
+const initialState = null ;
 
 export default function reducer(state = initialState, action) {
   switch (action.type) {
-    case INIT_DATA_USERS:
+    case GET_DATA_USER:
     return action.data;
   }
   return state
